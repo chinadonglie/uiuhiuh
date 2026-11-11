@@ -1,25 +1,28 @@
-const SESSION_ID = "41231193526%3A4JZRqLDoyv9o9O%3A8%3AAYnAHBv9_jXMlpDTdt54oinlPh3wY3QzwBrlMlXKdg" // paste your Instagram sessionid cookie value
+const RAPIDAPI_KEY = "164ce828f7msh1a5b75320c73aefp17c6c9jsn1584369dde21"
 
 async function getInstagramLink(username) {
-  const res = await fetch(
-    `https://www.instagram.com/api/v1/users/web_profile_info/?username=${username}`,
-    {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-        "X-IG-App-ID": "936619743392459",
-        "X-Requested-With": "XMLHttpRequest",
-        "Cookie": `sessionid=${SESSION_ID}`,
-        Referer: `https://www.instagram.com/${username}/`,
-      },
-    }
-  );
+  try {
+    const form = new FormData()
+    form.append("username_or_url", username)
+    form.append("data", "profile")
 
-  if (!res.ok) return null;
-
-  const json = await res.json();
-  const externalUrl = json?.data?.user?.external_url;
-
-  return externalUrl || null;
+    const res = await fetch(
+      "https://instagram-scraper-stable-api.p.rapidapi.com/account_data_v2",
+      {
+        method: "POST",
+        headers: {
+          "x-rapidapi-key": RAPIDAPI_KEY,
+          "x-rapidapi-host": "instagram-scraper-stable-api.p.rapidapi.com",
+        },
+        body: form,
+      }
+    )
+    if (!res.ok) return null
+    const json = await res.json()
+    return json?.external_url || json?.data?.external_url || json?.user?.external_url || null
+  } catch {
+    return null
+  }
 }
 
-module.exports = { getInstagramLink };
+module.exports = { getInstagramLink }
